@@ -350,6 +350,9 @@ impl TrustLinkContract {
     pub fn register_issuer(env: Env, admin: Address, issuer: Address) -> Result<(), Error> {
         admin.require_auth();
         Validation::require_admin(&env, &admin)?;
+        if Storage::is_bridge(&env, &issuer) {
+            return Err(Error::Unauthorized);
+        }
         Storage::add_issuer(&env, &issuer);
         Storage::increment_total_issuers(&env);
         Events::issuer_registered(&env, &issuer, &admin, env.ledger().timestamp());
@@ -472,6 +475,9 @@ impl TrustLinkContract {
     ) -> Result<(), Error> {
         admin.require_auth();
         Validation::require_admin(&env, &admin)?;
+        if Storage::is_issuer(&env, &bridge_contract) {
+            return Err(Error::Unauthorized);
+        }
         Storage::add_bridge(&env, &bridge_contract);
         Ok(())
     }
