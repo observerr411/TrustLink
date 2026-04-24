@@ -166,6 +166,34 @@ fn test_register_bridge_is_admin_only() {
 }
 
 #[test]
+fn test_register_issuer_rejects_existing_bridge() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let (admin, _, client) = setup(&env);
+    let role_address = Address::generate(&env);
+
+    client.register_bridge(&admin, &role_address);
+    let result = client.try_register_issuer(&admin, &role_address);
+
+    assert_eq!(result, Err(Ok(types::Error::Unauthorized)));
+}
+
+#[test]
+fn test_register_bridge_rejects_existing_issuer() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let (admin, _, client) = setup(&env);
+    let role_address = Address::generate(&env);
+
+    client.register_issuer(&admin, &role_address);
+    let result = client.try_register_bridge(&admin, &role_address);
+
+    assert_eq!(result, Err(Ok(types::Error::Unauthorized)));
+}
+
+#[test]
 fn test_fee_is_disabled_by_default() {
     let env = Env::default();
     env.mock_all_auths();
